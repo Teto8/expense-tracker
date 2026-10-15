@@ -26,13 +26,14 @@ category through a foreign key, and the amount must be greater than zero.
    `schema.sql`, `sample_data.sql`, `procedures.sql`
 4. Install the dependency:
    `pip install -r requirements.txt`
-5. Run the app:
+5. The connection string in `app.py` assumes SQL Server Express at
+`localhost\SQLEXPRESS` with Windows authentication. Change `CONN_STR`
+if your server is different.
+6. Run the app:
    `python app.py`
 
 
-The connection string in `app.py` assumes SQL Server Express at
-`localhost\SQLEXPRESS` with Windows authentication. Change `CONN_STR`
-if your server is different.
+
 
 ## What I learned
 - Designing a relational schema with keys and constraints
