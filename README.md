@@ -22,15 +22,12 @@ category through a foreign key, and the amount must be greater than zero.
 ## Setup
 1. Install SQL Server Express, SSMS and ODBC Driver 18 for SQL Server.
 2. Create a database called `ExpenseTracker`.
-3. Run the files in the `sql` folder in this order:
+3. Run the sql files in this order:
    `schema.sql`, `sample_data.sql`, `procedures.sql`
 4. Install the dependency:
    `pip install -r requirements.txt`
 5. Run the app:
    `python app.py`
-
-## Screenshot
-![App screenshot](screenshot.png)
 
 
 The connection string in `app.py` assumes SQL Server Express at
