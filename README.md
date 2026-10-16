@@ -10,6 +10,8 @@ spending reports by category.
 - View the latest expenses
 - Input validation and parameterized SQL queries
 - Export a monthly report to CSV
+- Edit and delete existing expenses
+- Export a monthly report to CSV
 
 ## Tech stack
 - SQL Server Express
