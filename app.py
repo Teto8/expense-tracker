@@ -1,5 +1,6 @@
 import pyodbc
 from datetime import date
+import csv
 
 CONN_STR = (
     "DRIVER={ODBC Driver 18 for SQL Server};"
@@ -67,10 +68,25 @@ def recent_expenses(limit=10):
         for r in cur.fetchall():
             print(f"  {r.ExpenseDate}  {r.Name:<10} {r.Amount:>9.2f}  {r.Description}")
 
+def export_report(year, month):
+    with get_connection() as conn:
+        cur = conn.cursor()
+        cur.execute("EXEC dbo.usp_MonthlyReport ?, ?", year, month)
+        rows = cur.fetchall()
+    if not rows:
+        print("No expenses for that month.")
+        return
+    filename = f"report_{year}_{month:02d}.csv"
+    with open(filename, "w", newline="", encoding="utf-8") as f:
+        writer = csv.writer(f)
+        writer.writerow(["Category", "Total"])
+        for r in rows:
+            writer.writerow([r.Category, f"{r.Total:.2f}"])
+    print(f"Saved {filename}")
 
 def main():
     while True:
-        print("\n1) Add expense  2) Monthly report  3) Latest expenses  4) Quit")
+        print("\n1) Add expense  2) Monthly report  3) Latest expenses  4) Export report  5) Quit")
         choice = input("Choose: ").strip()
 
         if choice == "1":
@@ -101,11 +117,22 @@ def main():
             recent_expenses()
 
         elif choice == "4":
+            try:
+                year = int(input("Year (e.g. 2026): "))
+                month = int(input("Month (1-12): "))
+                if not 1 <= month <= 12:
+                    raise ValueError
+            except ValueError:
+                print("Please enter a valid year and a month from 1 to 12.")
+                continue
+            export_report(year, month)
+
+        elif choice == "5":
             print("Goodbye!")
             break
 
         else:
-            print("Please choose 1, 2, 3 or 4.")
+            print("Please choose 1, 2, 3, 4 or 5.")
 
 
 if __name__ == "__main__":
