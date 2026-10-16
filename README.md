@@ -9,6 +9,7 @@ spending reports by category.
 - Monthly report per category with a total, using a stored procedure
 - View the latest expenses
 - Input validation and parameterized SQL queries
+- Export a monthly report to CSV
 
 ## Tech stack
 - SQL Server Express
