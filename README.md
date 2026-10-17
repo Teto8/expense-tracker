@@ -12,6 +12,7 @@ spending reports by category.
 - Export a monthly report to CSV
 - Edit and delete existing expenses
 - Export a monthly report to CSV
+- Set monthly budgets per category and see which ones you're over
 
 ## Tech stack
 - SQL Server Express
