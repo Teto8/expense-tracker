@@ -170,10 +170,60 @@ def ask_expense_id():
         print("Please enter a number.")
         return None
 
+def set_budget(category, limit):
+    with get_connection() as conn:
+        cur = conn.cursor()
+        cur.execute("SELECT CategoryId FROM Categories WHERE Name = ?", category)
+        row = cur.fetchone()
+        if row is None:
+            print(f"Category '{category}' does not exist.")
+            return
+        cur.execute(
+            "UPDATE Budgets SET MonthlyLimit = ? WHERE CategoryId = ?",
+            limit, row.CategoryId,
+        )
+        if cur.rowcount == 0:
+            cur.execute(
+                "INSERT INTO Budgets (CategoryId, MonthlyLimit) VALUES (?, ?)",
+                row.CategoryId, limit,
+            )
+        conn.commit()
+        print(f"Budget for {category} set to {limit:.2f} per month.")
+
+
+def budget_report(year, month):
+    with get_connection() as conn:
+        cur = conn.cursor()
+        cur.execute("EXEC dbo.usp_BudgetReport ?, ?", year, month)
+        rows = cur.fetchall()
+        if not rows:
+            print("No budgets set yet. Use option 7 to set one.")
+            return
+        print(f"\nBudget report for {year}-{month:02d}")
+        print(f"  {'Category':<12} {'Budget':>9} {'Spent':>9} {'Left':>9}")
+        for r in rows:
+            status = "  <-- OVER BUDGET" if r.Spent > r.MonthlyLimit else ""
+            print(
+                f"  {r.Category:<12} {r.MonthlyLimit:>9.2f} "
+                f"{r.Spent:>9.2f} {r.Remaining:>9.2f}{status}"
+            )        
+
+def ask_year_month():
+    try:
+        year = int(input("Year (e.g. 2026): "))
+        month = int(input("Month (1-12): "))
+        if not 1 <= month <= 12:
+            raise ValueError
+        return year, month
+    except ValueError:
+        print("Please enter a valid year and a month from 1 to 12.")
+        return None
+        
 def main():
     while True:
         print("\n1) Add expense  2) Monthly report  3) Latest expenses")
-        print("4) Export report  5) Edit expense  6) Delete expense  7) Quit")
+        print("4) Export report  5) Edit expense  6) Delete expense")
+        print("7) Set budget  8) Budget report  9) Quit")
         choice = input("Choose: ").strip()
 
         if choice == "1":
@@ -190,29 +240,17 @@ def main():
             add_expense(category, amount, description, date.today())
 
         elif choice == "2":
-            try:
-                year = int(input("Year (e.g. 2026): "))
-                month = int(input("Month (1-12): "))
-                if not 1 <= month <= 12:
-                    raise ValueError
-            except ValueError:
-                print("Please enter a valid year and a month from 1 to 12.")
-                continue
-            monthly_report(year, month)
+            period = ask_year_month()
+            if period:
+                monthly_report(*period)
 
         elif choice == "3":
             recent_expenses()
 
         elif choice == "4":
-            try:
-                year = int(input("Year (e.g. 2026): "))
-                month = int(input("Month (1-12): "))
-                if not 1 <= month <= 12:
-                    raise ValueError
-            except ValueError:
-                print("Please enter a valid year and a month from 1 to 12.")
-                continue
-            export_report(year, month)
+            period = ask_year_month()
+            if period:
+                export_report(*period)
 
         elif choice == "5":
             recent_expenses()
@@ -227,11 +265,28 @@ def main():
                 delete_expense(expense_id)
 
         elif choice == "7":
+            print("Categories:", ", ".join(list_categories()))
+            category = input("Category: ").strip()
+            try:
+                limit = float(input("Monthly budget: "))
+                if limit <= 0:
+                    raise ValueError
+            except ValueError:
+                print("Budget must be a positive number.")
+                continue
+            set_budget(category, limit)
+
+        elif choice == "8":
+            period = ask_year_month()
+            if period:
+                budget_report(*period)
+
+        elif choice == "9":
             print("Goodbye!")
             break
 
         else:
-            print("Please choose a number from 1 to 7.")
+            print("Please choose a number from 1 to 9.")
 
 
 if __name__ == "__main__":
