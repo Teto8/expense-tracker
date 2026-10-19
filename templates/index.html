@@ -22,7 +22,8 @@
 </head>
 <body>
   <h1>Expense Tracker</h1>
-  <p>{{ today.strftime("%B %Y") }}</p>
+  <p>{{ today.strftime("%B %Y") }} </p>
+  <p><a href="{{ url_for('budgets') }}">View budgets</a></p>
 
   {% with messages = get_flashed_messages() %}
     {% for message in messages %}

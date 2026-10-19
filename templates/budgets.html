@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Budgets</title>
+  <style>
+    body { font-family: Arial, sans-serif; max-width: 760px; margin: 2rem auto; padding: 0 1rem; color: #222; }
+    table { border-collapse: collapse; width: 100%; margin-bottom: 1.5rem; }
+    th, td { text-align: left; padding: 0.5rem; border-bottom: 1px solid #ddd; }
+    td.num, th.num { text-align: right; }
+    form.row { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 1.5rem; }
+    input, select, button { padding: 0.5rem; font-size: 1rem; }
+    .flash { background: #eef6ff; border: 1px solid #b6d4fe; padding: 0.5rem 0.75rem; margin-bottom: 1rem; }
+    .over { color: #b52b27; font-weight: bold; }
+  </style>
+</head>
+<body>
+  <p><a href="{{ url_for('index') }}">&larr; Back to expenses</a></p>
+  <h1>Budgets</h1>
+
+  {% with messages = get_flashed_messages() %}
+    {% for message in messages %}
+      <div class="flash">{{ message }}</div>
+    {% endfor %}
+  {% endwith %}
+
+  <form class="row" method="get" action="{{ url_for('budgets') }}">
+    <input type="month" name="period" value="{{ period }}" required>
+    <button type="submit">Show month</button>
+  </form>
+
+  {% if rows %}
+    <table>
+      <tr>
+        <th>Category</th>
+        <th class="num">Budget</th>
+        <th class="num">Spent</th>
+        <th class="num">Left</th>
+        <th></th>
+      </tr>
+      {% for r in rows %}
+        <tr>
+          <td>{{ r.Category }}</td>
+          <td class="num">{{ "%.2f"|format(r.MonthlyLimit) }}</td>
+          <td class="num">{{ "%.2f"|format(r.Spent) }}</td>
+          <td class="num">{{ "%.2f"|format(r.Remaining) }}</td>
+          <td>{% if r.Spent > r.MonthlyLimit %}<span class="over">OVER BUDGET</span>{% endif %}</td>
+        </tr>
+      {% endfor %}
+    </table>
+  {% else %}
+    <p>No budgets set yet. Add one below.</p>
+  {% endif %}
+
+  <h2>Set a budget</h2>
+  <form class="row" method="post" action="{{ url_for('save_budget') }}">
+    <input type="hidden" name="period" value="{{ period }}">
+    <select name="category" required>
+      {% for name in categories %}
+        <option value="{{ name }}">{{ name }}</option>
+      {% endfor %}
+    </select>
+    <input type="number" name="limit" step="0.01" min="0.01" placeholder="Monthly budget" required>
+    <button type="submit">Save budget</button>
+  </form>
+</body>
+</html>
