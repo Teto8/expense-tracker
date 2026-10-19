@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Expense Tracker</title>
+  <style>
+    body { font-family: Arial, sans-serif; max-width: 760px; margin: 2rem auto; padding: 0 1rem; color: #222; }
+    h1 { margin-bottom: 0.2rem; }
+    table { border-collapse: collapse; width: 100%; margin-bottom: 1.5rem; }
+    th, td { text-align: left; padding: 0.5rem; border-bottom: 1px solid #ddd; }
+    td.num, th.num { text-align: right; }
+    form { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 1.5rem; }
+    input, select, button { padding: 0.5rem; font-size: 1rem; }
+    .flash { background: #eef6ff; border: 1px solid #b6d4fe; padding: 0.5rem 0.75rem;
+    margin-bottom: 1rem; }   
+    a.btn, button.btn { padding: 0.3rem 0.7rem; font-size: 0.9rem; border: 1px solid #bbb;
+                        border-radius: 4px; background: #f4f4f4; color: #222;
+                        text-decoration: none; cursor: pointer; }
+    button.danger { border-color: #d9534f; color: #b52b27; }
+  </style>
+</head>
+<body>
+  <h1>Expense Tracker</h1>
+  <p>{{ today.strftime("%B %Y") }}</p>
+
+  {% with messages = get_flashed_messages() %}
+    {% for message in messages %}
+      <div class="flash">{{ message }}</div>
+    {% endfor %}
+  {% endwith %}
+
+  <h2>Add an expense</h2>
+  <form action="{{ url_for('add') }}" method="post">
+    <select name="category" required>
+      {% for name in categories %}
+        <option value="{{ name }}">{{ name }}</option>
+      {% endfor %}
+    </select>
+    <input type="number" name="amount" step="0.01" min="0.01" placeholder="Amount" required>
+    <input type="text" name="description" placeholder="Description" maxlength="200">
+    <button type="submit">Add</button>
+  </form>
+
+  <h2>This month by category</h2>
+  {% if summary %}
+    <table>
+      <tr><th>Category</th><th class="num">Total</th></tr>
+      {% for row in summary %}
+        <tr><td>{{ row.Category }}</td><td class="num">{{ "%.2f"|format(row.Total) }}</td></tr>
+      {% endfor %}
+    </table>
+  {% else %}
+    <p>No expenses this month yet.</p>
+  {% endif %}
+
+      <h2>Latest expenses</h2>
+  <table>
+    <tr>
+      <th>Date</th>
+      <th>Category</th>
+      <th>Description</th>
+      <th class="num">Amount</th>
+      <th></th>
+    </tr>
+    {% for e in expenses %}
+      <tr>
+        <td>{{ e.ExpenseDate }}</td>
+        <td>{{ e.Name }}</td>
+        <td>{{ e.Description }}</td>
+        <td class="num">{{ "%.2f"|format(e.Amount) }}</td>
+        <td>
+          <a class="btn" href="{{ url_for('edit', expense_id=e.ExpenseId) }}">Edit</a>
+          <form action="{{ url_for('delete', expense_id=e.ExpenseId) }}" method="post"
+                style="display:inline; margin:0;"
+                onsubmit="return confirm('Delete this expense?');">
+            <button class="btn danger" type="submit">Delete</button>
+          </form>
+        </td>
+      </tr>
+    {% endfor %}
+  </table>
+</body>
+</html>

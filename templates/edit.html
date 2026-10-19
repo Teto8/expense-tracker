@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Edit expense</title>
+  <style>
+    body { font-family: Arial, sans-serif; max-width: 760px; margin: 2rem auto; padding: 0 1rem; color: #222; }
+    form { display: flex; flex-direction: column; gap: 0.75rem; max-width: 360px; }
+    input, select, button { padding: 0.5rem; font-size: 1rem; }
+    .flash { background: #eef6ff; border: 1px solid #b6d4fe; padding: 0.5rem 0.75rem; margin-bottom: 1rem; }
+  </style>
+</head>
+<body>
+  <h1>Edit expense #{{ expense.ExpenseId }}</h1>
+
+  {% with messages = get_flashed_messages() %}
+    {% for message in messages %}
+      <div class="flash">{{ message }}</div>
+    {% endfor %}
+  {% endwith %}
+
+  <form method="post">
+    <label>Category
+      <select name="category" required>
+        {% for name in categories %}
+          <option value="{{ name }}" {% if name == expense.Name %}selected{% endif %}>{{ name }}</option>
+        {% endfor %}
+      </select>
+    </label>
+    <label>Amount
+      <input type="number" name="amount" step="0.01" min="0.01" value="{{ expense.Amount }}" required>
+    </label>
+    <label>Description
+      <input type="text" name="description" maxlength="200" value="{{ expense.Description or '' }}">
+    </label>
+    <label>Date
+      <input type="date" name="expense_date" value="{{ expense.ExpenseDate }}" required>
+    </label>
+    <button type="submit">Save changes</button>
+    <a href="{{ url_for('index') }}">Cancel</a>
+  </form>
+</body>
+</html>
